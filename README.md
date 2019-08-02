@@ -1,21 +1,21 @@
-#JS-Solitaire
+# JS-Solitaire
 
-###Objective:
+### Objective:
 
 Make a JS based Solitaire game
 
-###Technology Used:
+### Technology Used:
 
 JS, CSS, and HTML
 
-###Wireframe:
+### Wireframe:
 
  https://wireframe.cc/hIluXg
 
- ###User Stories:
+ ### User Stories:
 
- ###Feature List:
+ ### Feature List:
 
- ###Stretch Goals:
+ ### Stretch Goals:
 
- ###Pseudocode: 
+ ### Pseudocode: 

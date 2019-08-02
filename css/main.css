@@ -1,0 +1,66 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    font-family: 'Grenze', serif;
+    height: 100vh;
+    background: radial-gradient(#409c2b, #385e2c);
+}
+
+h1 {
+    color: lightgrey;
+    margin-bottom: 20px;
+    font-size: 40px;
+}
+
+#gameBoard {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch center;
+    height: 80vh;
+    border: 2px solid rgba(167, 201, 164, 0.6);
+    border-radius: 5px;    
+    padding: 40px 40px 20px 40px;
+}
+
+#topRow {
+    display: flex;
+}
+
+#draw {
+    margin-right: auto;
+}
+
+#bottomRow {
+    display: flex;
+}
+
+footer {
+    display: flex; 
+    justify-content: left;
+    margin-top: auto;
+}
+
+#timer {
+    margin-right: 1vw;
+    color: lightgrey;
+}
+
+#score {
+    margin-right: auto;
+    color: lightgrey;
+}
+
+#resetButton {
+    background: #629736;
+    width: 50px;
+    border: solid 1px lightgrey;
+    border-radius: 2px;
+    color: lightgrey;
+    font-family: 'Grenze', serif;
+}

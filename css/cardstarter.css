@@ -1,7 +1,6 @@
 @charset "UTF-8";
 .card {
   box-sizing: border-box;
-  display: inline-block;
   margin: 5px 5px 50px 5px;
   cursor: pointer;
   /* Set the card's dimensions, and size it relative to
@@ -19,9 +18,6 @@
   background-size: contain;
   /* "Hide" any text within the element (use text to be
      simply compliant with screen readers, etc.). */
-  text-indent: 100%;
-  white-space: nowrap;
-  overflow: hidden;
   /* Default sizes for cards (size based off the font). */
   /* Optional styles for cards: borderless and drop shadow. */
   /* Not a card, but a card-shaped outline to represent a

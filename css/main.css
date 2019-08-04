@@ -68,3 +68,7 @@ footer {
     color: lightgrey;
     font-family: 'Grenze', serif;
 }
+
+.highlight {
+    box-shadow: 0px 0px 8px cyan;
+}

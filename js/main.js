@@ -23,8 +23,6 @@ const boardEls = {
     stack7: document.getElementById('stack7')
 }
 /*----- event listeners -----*/ 
-// document.querySelector('#resetButton').addEventListener('click', init);
-// document.querySelector('#pile').addEventListener('click', drawCard);
 document.querySelector('#gameBoard').addEventListener('click', handleClick);
 
 /*----- functions -----*/
@@ -44,8 +42,6 @@ function init() {
     makeDeck();
     // shuffle deck
     shuffleDeck();
-    // create card elements
-    // createCardEls();
     // deal cards to game board
     dealCards();
     render();
@@ -76,6 +72,8 @@ function render() {
     
     // render all cards in the 'draw' face up
     renderDraw();
+
+    renderAces();
 }
 function renderPile() {
     pile.forEach((card, cIdx) => {
@@ -93,6 +91,19 @@ function renderDraw() {
         boardEls.draw.appendChild(cardEl);
     });
 }
+
+function renderAces() {
+    aces.forEach((stack, sIdx) => {
+        stack.forEach((card, cIdx) => {
+            let cardEl = document.createElement('div');
+            cardEl.className = `card ${card.suit}${card.value}`
+            cardEl.style = `position: absolute; left: -7px; top: ${-7 + (cIdx*-.5)}px;`
+            boardEls[`ace${sIdx +1}`].appendChild(cardEl);
+        });
+    });
+
+}
+
 function makeDeck() {
     suits.forEach(suit => {
         values.forEach(value => {
@@ -117,18 +128,16 @@ function dealCards() {
 }
 
 function drawCard () {
-    if(pile.length > 0) {
-        draw.push(pile.pop());
-        // boardEls.pile.removeChild(boardEls.pile.lastChild)
-        render();
-    } else {
-        while(draw.length > 0) {
-            pile.push(draw.pop())
+    if(!clickedCard) {
+        if(pile.length > 0) {
+            draw.push(pile.pop());
+            render();
+        } else {
+            while(draw.length > 0) {
+                pile.push(draw.pop())
+            }
+            render();
         }
-        render();
-        // while(boardEls.draw.firstChild) {
-        //     boardEls.draw.removeChild(boardEls.draw.firstChild);
-        // }
     }
 }
 
@@ -147,32 +156,13 @@ function handleClick(evt) {
         handleStackClick(evt.target);
     } else if (clickDest.includes('ace')) {
         handleAceClick(evt.target);
-    } else if (!clickedCard && clickDest === 'draw') {
-        handleDrawClick();
+    } else if (clickDest === 'draw') {
+        handleDrawClick(evt.target);
     } else if (clickDest === 'pile') {
         drawCard();
     } else if (clickDest === 'resetButton') {
         init();
     }
-    // if (!clickedCard && isFaceUpCard(evt.target)) {
-    //     clickedCard = evt.target;
-    //     clickedCard.className += ' highlight';
-    //     let stackId = clickedCard.parentNode.id.replace('stack', '') -1;
-    //     console.log(stacks[stackId][stacks[stackId].length-1]);
-    // } else if (isFaceUpCard(evt.target)) {
-    //     // check if clicked card is playable on destCard
-    //     let destCard = evt.target;
-    //     console.log(destCard.parentNode);
-    //     // play clicked card on top of the destCard
-    //     destCard.parentNode.appendChild(clickedCard);
-    //     clickedCard.className = clickedCard.className.replace(' highlight', '');
-    //     clickedCard = null;
-    // } else if (isAcePile(evt.target)) {
-    //     console.log(`that's an ace pile`)
-    // }
-    
-    // clickedCard.parentNode.removeChild(clickedCard)
-    // clickedCard = null;
 }
 
 function isFaceUpCard(element) {
@@ -237,7 +227,7 @@ function handleStackClick(element) {
             render();
         }
         // move card to empty stack destination
-    } else if (clickedCard && isEmptyStack(element)) {
+    } else if (clickedCard && isEmptyStack(element) && getCardValue(clickedCard) === 13) {
         while(cardArr.length > 0) {
             stacks[stackId].push(cardArr.pop());
             stacksFaceUp[stackId]++;
@@ -247,12 +237,61 @@ function handleStackClick(element) {
     } 
 } 
 
-function handleAceClick() {
-    console.log('handling Ace click');
+function handleAceClick(element) {
+    let aceId = getClickDestination(element).replace('ace', '') -1;
+    let topCard = aces[aceId][aces[aceId].length -1];
+    if(!clickedCard && isFaceUpCard(element)){
+        firstStackId = aceId;
+        element.className += ' highlight';
+        stackPos = getPositionInStack(element.parentNode.children);
+        clickedCard = aces[aceId][stackPos];
+        let cardsToPush = stackPos - aces[aceId].length;
+        while(cardsToPush < 0){
+            cardArr.push(aces[aceId].pop());
+            cardsToPush++;
+        }
+    } else if (clickedCard) {
+        if(!topCard) {
+            if(getCardValue(clickedCard) === 1) {
+                while(cardArr.length > 0) {
+                    aces[aceId].push(cardArr.pop());
+                }
+                clickedCard = null;
+                render();
+            }
+        } else {
+            if (getCardValue(clickedCard) === getCardValue(topCard) + 1 && clickedCard.suit === topCard.suit) {
+                while(cardArr.length > 0) {
+                    aces[aceId].push(cardArr.pop());
+                }
+                clickedCard = null;
+                render();
+            }
+        }    
+    }
 }
 
-function handleDrawClick() {
-    console.log('handlingDrawClick')
+function handleDrawClick(element) {
+    let topCard = draw[draw.length -1];
+    let topCardEl = boardEls.draw.lastChild;
+    // console.log(getClickDestination(element));
+    // console.log(topCardEl)
+    // console.log(topCard)
+    if(!clickedCard && !isEmptyStack(element)){
+        topCardEl.className += ' highlight';
+        clickedCard = topCard;
+        let cardsToPush = -1;
+        while(cardsToPush < 0){
+            cardArr.push(draw.pop());
+            cardsToPush++;
+        }
+    } else if (getClickDestination(element) === 'draw') {
+        while(cardArr.length > 0) {
+            draw.push(cardArr.pop());
+        }
+        clickedCard = null;
+        render();
+    } 
 }
 
 function isEmptyStack(element) {
@@ -262,9 +301,9 @@ function isEmptyStack(element) {
 function isPlayLegal(card1, card2) {
     
     let card1Color = getCardColor(card1);
-    let card1Value = getCardValue(card1.value);
+    let card1Value = getCardValue(card1);
     let card2Color = getCardColor(card2);
-    let card2Value = getCardValue(card2.value);
+    let card2Value = getCardValue(card2);
 
     if(card1Color === card2Color) {
         return false;
@@ -279,8 +318,8 @@ function getCardColor(cardObj) {
     } else return 'black';
 }
 
-function getCardValue(cardObjValue) {
-    switch(cardObjValue) {
+function getCardValue(cardObj) {
+    switch(cardObj.value) {
         case 'A': return 1;
         break;
         case '02': return 2;

@@ -25,7 +25,7 @@ h1 {
     height: 80vh;
     border: 2px solid rgba(167, 201, 164, 0.6);
     border-radius: 5px;    
-    padding: 40px 40px 20px 40px;
+    padding: 40px 20px 20px 20px;
 }
 
 #gameBoard section div {
@@ -51,18 +51,18 @@ footer {
 }
 
 #timer {
-    margin-right: 1vw;
-    color: lightgrey;
-}
-
-#score {
     margin-right: auto;
     color: lightgrey;
 }
 
-#resetButton {
+#score {
+    margin-right: 3vw;
+    color: lightgrey;
+}
+
+button {
     background: #629736;
-    width: 50px;
+    width: 75px;
     border: solid 1px lightgrey;
     border-radius: 2px;
     color: lightgrey;

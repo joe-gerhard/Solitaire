@@ -1,9 +1,22 @@
+// TODO:
+// 1) add double click functionality for scoring cards,
+// 2) keep track of the user's score
+// 3) fix the reset button overlap problem on small window heights
+// 4) add card scaling based on window size functionality
+// 5) add instructions section
+
+// STRETCH GOALS:
+// 1) add difficulty option--draw 3 cards at a time instead of 1
+// 2) add drag and drop functionality
+// 3) highlight all possible moves when card is highlighted
+// 4) make winning more exciting
+
 /*----- constants -----*/ 
 const suits = ['s', 'h', 'c', 'd'];
 const values = ['A', '02', '03', '04', '05', '06', '07', '08', '09', '10', 'J', 'Q', 'K']
 /*----- app's state (variables) -----*/ 
 
-let deck, pile, draw, stacks, aces, winner, clickedCard, firstStackId, cardArr;
+let deck, pile, draw, stacks, aces, winner, clickedCard, firstStackId, cardArr, secondsPlayed, counter;
 
 /*----- cached element references -----*/ 
 
@@ -22,6 +35,8 @@ const boardEls = {
     stack6: document.getElementById('stack6'),
     stack7: document.getElementById('stack7')
 }
+
+const timerEl = document.getElementById('timer');
 /*----- event listeners -----*/ 
 document.querySelector('#gameBoard').addEventListener('click', handleClick);
 
@@ -29,6 +44,7 @@ document.querySelector('#gameBoard').addEventListener('click', handleClick);
 init();
 
 function init() {
+    stopTimer();
     deck = [];
     pile = [];
     draw = [];
@@ -38,6 +54,8 @@ function init() {
     aces = [[],[],[],[]]
     winner = null;
     clickedCard = null;
+    secondsPlayed = null;
+    counter = null;
     // make deck
     makeDeck();
     // shuffle deck
@@ -50,7 +68,7 @@ function init() {
 function render() {
     clearAllDivs();
     // for each card on each pile, render them with the card back showing
-    // if it's the last card in the pile, render it with it's face up
+    // render them face up if they are supposed to be face up
     stacks.forEach((stack, sIdx) => {
         stack.forEach((card, cIdx) => {
             let cardEl = document.createElement('div');
@@ -62,7 +80,7 @@ function render() {
                 }
                 faceUp--;
             }
-            cardEl.style = `position: absolute; left: -7px; top: ${-7 + (cIdx*10)}px;`
+            cardEl.style = `position: absolute; left: -7px; top: ${-7 + (cIdx * 10)}px;`
             boardEls[`stack${sIdx +1}`].appendChild(cardEl);
         })
     })
@@ -73,7 +91,14 @@ function render() {
     // render all cards in the 'draw' face up
     renderDraw();
 
+    // render all cards in the 'ace' piles face up
     renderAces();
+
+    // check for winner
+    if(checkWinner()) {
+        clearInterval(counter);
+        document.querySelector('h1').textContent = 'You Win!';
+    }
 }
 function renderPile() {
     pile.forEach((card, cIdx) => {
@@ -102,6 +127,15 @@ function renderAces() {
         });
     });
 
+}
+
+function checkWinner() {
+    for (let i = 0; i < aces.length; i++) {
+        if (aces[i].length < 13) {
+            return false;
+        }
+    }
+    return true;
 }
 
 function makeDeck() {
@@ -150,7 +184,14 @@ function clearAllDivs() {
 }
 
 function handleClick(evt) {
+
+    
     let clickDest = getClickDestination(evt.target);
+    
+    
+    if(!counter && clickDest !== 'resetButton') {
+        startTimer();
+    }
 
     if (clickDest.includes('stack')) {
         handleStackClick(evt.target);
@@ -191,6 +232,7 @@ function handleStackClick(element) {
     let stackId = getClickDestination(element).replace('stack', '') -1;
     let topCard = stacks[stackId][stacks[stackId].length -1];
     let stackPos;
+
     // select card to move
     if (!clickedCard && isFaceUpCard(element)) {
         firstStackId = stackId;
@@ -238,8 +280,10 @@ function handleStackClick(element) {
 } 
 
 function handleAceClick(element) {
+
     let aceId = getClickDestination(element).replace('ace', '') -1;
     let topCard = aces[aceId][aces[aceId].length -1];
+
     if(!clickedCard && isFaceUpCard(element)){
         firstStackId = aceId;
         element.className += ' highlight';
@@ -272,11 +316,10 @@ function handleAceClick(element) {
 }
 
 function handleDrawClick(element) {
+
     let topCard = draw[draw.length -1];
     let topCardEl = boardEls.draw.lastChild;
-    // console.log(getClickDestination(element));
-    // console.log(topCardEl)
-    // console.log(topCard)
+
     if(!clickedCard && !isEmptyStack(element)){
         topCardEl.className += ' highlight';
         clickedCard = topCard;
@@ -285,7 +328,7 @@ function handleDrawClick(element) {
             cardArr.push(draw.pop());
             cardsToPush++;
         }
-    } else if (getClickDestination(element) === 'draw') {
+    } else if (topCardEl.className.includes('highlight') && getClickDestination(element) === 'draw') {
         while(cardArr.length > 0) {
             draw.push(cardArr.pop());
         }
@@ -356,4 +399,29 @@ function getPositionInStack(HTMLCollection) {
             return i;
         }
     }
+}
+
+function startTimer() {
+    secondsPlayed = 0;
+    counter = setInterval(count, 1000);
+}
+
+function stopTimer() {
+    secondsPlayed = null;
+    clearInterval(counter);
+    timerEl.textContent = `time - 0:00`;
+}
+
+function count() {
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
+
+    secondsPlayed++;
+
+    hours = Math.floor(minutes / 60)
+    minutes = (Math.floor(secondsPlayed / 60)) - (hours * 60);
+    seconds = secondsPlayed - (minutes * 60);
+    
+    timerEl.textContent = `time - ${hours > 0 ? `${hours}:` : ''}${minutes < 10 && hours > 0 ? `0${minutes}`: minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
 }

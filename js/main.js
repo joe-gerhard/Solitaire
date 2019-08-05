@@ -35,6 +35,7 @@ function init() {
     pile = [];
     draw = [];
     stacks = [[],[],[],[],[],[],[]]
+    stacksFaceUp = [1,1,1,1,1,1,1]
     aces = [[],[],[],[]]
     winner = null;
     clickedCard = null;
@@ -56,12 +57,15 @@ function render() {
     stacks.forEach((stack, sIdx) => {
         stack.forEach((card, cIdx) => {
             let cardEl = document.createElement('div');
-            if (cIdx === stack.length -1) {
-                cardEl.className = `card ${card.suit}${card.value}`
-            } else {
-                cardEl.className = `card back ${card.suit}${card.value}`
+            cardEl.className = `card back ${card.suit}${card.value}`
+            let faceUp = stacksFaceUp[sIdx];
+            while(faceUp > 0){
+                if(cIdx === stack.length - faceUp) {
+                    cardEl.className = cardEl.className.replace(' back', '');
+                }
+                faceUp--;
             }
-            cardEl.style = `position: absolute; left: -7px; top: ${-7 + (cIdx*7)}px;`
+            cardEl.style = `position: absolute; left: -7px; top: ${-7 + (cIdx*8)}px;`
             boardEls[`stack${sIdx +1}`].appendChild(cardEl);
         })
     })
@@ -139,10 +143,10 @@ function handleClick(evt) {
     let clickDest = getClickDestination(evt.target);
 
     if (clickDest.includes('stack')) {
-        handleStackClick();
+        handleStackClick(evt.target);
     } else if (clickDest.includes('ace')) {
-        handleAceClick();
-    } else if (clickDest === 'draw') {
+        handleAceClick(evt.target);
+    } else if (!clickedCard && clickDest === 'draw') {
         handleDrawClick();
     } else if (clickDest === 'pile') {
         drawCard();
@@ -191,9 +195,26 @@ function getClickDestination(element) {
     }
 }
 
-function handleStackClick() {
-    console.log('handling Stack click');
-}
+function handleStackClick(element) {
+
+    let stackId = getClickDestination(element).replace('stack', '') -1;
+    if (!clickedCard && isFaceUpCard(element)) {
+        // console.log(element.className);
+        // let card = (stacks[stackId][stacks[stackId].length -1]);
+        // console.log(card)
+        clickedCard = stacks[stackId].pop();
+        element.className += ' highlight';
+        stacksFaceUp[stackId]--;
+    } else if (!clickedCard && element === element.parentNode.lastChild) {
+        stacksFaceUp[stackId]++;
+        render();
+    } else if (clickedCard &&(isFaceUpCard(element) || isEmptyStack(element))) {
+        stacks[stackId].push(clickedCard);
+        clickedCard = null;
+        stacksFaceUp[stackId]++;
+        render();
+    }
+} 
 
 function handleAceClick() {
     console.log('handling Ace click');
@@ -201,4 +222,8 @@ function handleAceClick() {
 
 function handleDrawClick() {
     console.log('handlingDrawClick')
+}
+
+function isEmptyStack(element) {
+    return element.parentNode.firstChild;
 }

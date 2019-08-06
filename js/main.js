@@ -1,22 +1,27 @@
 // TODO:
-// 1) add double click functionality for scoring cards,
-// 2) keep track of the user's score
+// 1) add double click functionality for scoring cards
+// 2) subtract time penalty from final score
 // 3) fix the reset button overlap problem on small window heights
 // 4) add card scaling based on window size functionality
-// 5) add instructions section
+// 5) add 'instructions' section
 
 // STRETCH GOALS:
 // 1) add difficulty option--draw 3 cards at a time instead of 1
 // 2) add drag and drop functionality
 // 3) highlight all possible moves when card is highlighted
 // 4) make winning more exciting
+// 5) make under function
+// 6) add functionality to 'replay' the same game from the start
 
 /*----- constants -----*/ 
+
 const suits = ['s', 'h', 'c', 'd'];
 const values = ['A', '02', '03', '04', '05', '06', '07', '08', '09', '10', 'J', 'Q', 'K']
+
 /*----- app's state (variables) -----*/ 
 
-let deck, pile, draw, stacks, aces, winner, clickedCard, firstStackId, cardArr, secondsPlayed, counter;
+let deck, pile, draw, stacks, aces, winner, clickedCard, firstClickDest, firstStackId, 
+cardArr, secondsPlayed, counter, boardScore, totalScore, drawCycles;
 
 /*----- cached element references -----*/ 
 
@@ -37,10 +42,14 @@ const boardEls = {
 }
 
 const timerEl = document.getElementById('timer');
+const scoreEl = document.getElementById('score');
+
 /*----- event listeners -----*/ 
+
 document.querySelector('#gameBoard').addEventListener('click', handleClick);
 
 /*----- functions -----*/
+
 init();
 
 function init() {
@@ -56,11 +65,11 @@ function init() {
     clickedCard = null;
     secondsPlayed = null;
     counter = null;
-    // make deck
+    boardScore = 0;
+    totalScore = 0;
+    drawCycles = 0;
     makeDeck();
-    // shuffle deck
     shuffleDeck();
-    // deal cards to game board
     dealCards();
     render();
 }
@@ -93,6 +102,10 @@ function render() {
 
     // render all cards in the 'ace' piles face up
     renderAces();
+
+    // get and update the current score
+    getScore();
+    updateScore();
 
     // check for winner
     if(checkWinner()) {
@@ -161,18 +174,20 @@ function dealCards() {
     });              
 }
 
-function drawCard () {
-    if(!clickedCard) {
-        if(pile.length > 0) {
-            draw.push(pile.pop());
-            render();
-        } else {
-            while(draw.length > 0) {
-                pile.push(draw.pop())
-            }
-            render();
-        }
-    }
+function getScore() {
+    totalScore = 0;
+    aces.forEach(pile => {
+        pile.forEach(card => {
+            totalScore+=10;
+        })
+    });
+    totalScore += boardScore;
+}
+
+function updateScore() {
+    let displayScore = totalScore;
+    if (displayScore < 0) displayScore = 0;
+    scoreEl.textContent = `score - ${displayScore}`
 }
 
 function clearAllDivs() {
@@ -185,10 +200,9 @@ function clearAllDivs() {
 
 function handleClick(evt) {
 
-    
     let clickDest = getClickDestination(evt.target);
     
-    
+    // start the timer on user's first click
     if(!counter && clickDest !== 'resetButton') {
         startTimer();
     }
@@ -200,42 +214,23 @@ function handleClick(evt) {
     } else if (clickDest === 'draw') {
         handleDrawClick(evt.target);
     } else if (clickDest === 'pile') {
-        drawCard();
+        handlePileClick();
     } else if (clickDest === 'resetButton') {
         init();
-    }
-}
-
-function isFaceUpCard(element) {
-    return (element.className.includes('card') && !(element.className.includes('back')) && !(element.className.includes('outline'))) 
-}
-
-function isAcePile(element) {
-    if (!(element.firstChild)) {
-        return element.id.includes('ace');
-    } else {
-        return element.parentNode.id.includes('ace');
-    }
-}
-
-function getClickDestination(element) {
-    if (element.id) {
-        return element.id;
-    } 
-    else {
-        return element.parentNode.id;
     }
 }
 
 function handleStackClick(element) {
 
     let stackId = getClickDestination(element).replace('stack', '') -1;
+    let clickDest = getClickDestination(element);
     let topCard = stacks[stackId][stacks[stackId].length -1];
     let stackPos;
 
-    // select card to move
+    // select and highlight card to move
     if (!clickedCard && isFaceUpCard(element)) {
         firstStackId = stackId;
+        firstClickDest = clickDest;
         element.className += ' highlight';
         stackPos = getPositionInStack(element.parentNode.children);
         clickedCard = stacks[stackId][stackPos];
@@ -245,35 +240,45 @@ function handleStackClick(element) {
             stacksFaceUp[stackId]--;
             cardsToPush++;
         }
+
     // flip over unflipped card in stack
     } else if (!clickedCard && element === element.parentNode.lastChild) {
         stacksFaceUp[stackId]++;
+        boardScore += 5;
         render();
+
     // move card to stack destination
     } else if (clickedCard && isFaceUpCard(element)) {
+
         // allow clicks on first clicked card
-        if (stackId === firstStackId) {
+        if (stackId === firstStackId && clickDest === firstClickDest) {
             while(cardArr.length > 0) {
                 stacks[stackId].push(cardArr.pop());
                 stacksFaceUp[stackId]++
             }
             clickedCard = null;
             render();
-        // check if play is legal
+
+        // push card to stack if play is legal
         } else if(isPlayLegal(clickedCard, topCard)){
             while(cardArr.length > 0) {
                 stacks[stackId].push(cardArr.pop());
                 stacksFaceUp[stackId]++;
             }
+            if(firstStackId === 'draw') boardScore += 5;
+            console.log(firstClickDest)
+            if(firstClickDest.includes('ace')) boardScore -= 5;
             clickedCard = null;
             render();
         }
-        // move card to empty stack destination
+
+    // move card to empty stack destination
     } else if (clickedCard && isEmptyStack(element) && getCardValue(clickedCard) === 13) {
         while(cardArr.length > 0) {
             stacks[stackId].push(cardArr.pop());
             stacksFaceUp[stackId]++;
         }
+        if(firstStackId === 'draw') boardScore += 5;
         clickedCard = null;
         render();
     } 
@@ -282,10 +287,13 @@ function handleStackClick(element) {
 function handleAceClick(element) {
 
     let aceId = getClickDestination(element).replace('ace', '') -1;
+    let clickDest = getClickDestination(element);
     let topCard = aces[aceId][aces[aceId].length -1];
 
+    // if a face up card hasn't been clicked yet, select and highlight this one
     if(!clickedCard && isFaceUpCard(element)){
         firstStackId = aceId;
+        firstClickDest = clickDest;
         element.className += ' highlight';
         stackPos = getPositionInStack(element.parentNode.children);
         clickedCard = aces[aceId][stackPos];
@@ -294,6 +302,8 @@ function handleAceClick(element) {
             cardArr.push(aces[aceId].pop());
             cardsToPush++;
         }
+
+    // if the highlighted card is an ace, put it in the empty ace pile
     } else if (clickedCard) {
         if(!topCard) {
             if(getCardValue(clickedCard) === 1) {
@@ -303,6 +313,8 @@ function handleAceClick(element) {
                 clickedCard = null;
                 render();
             }
+
+        // if the highlighted card is 1 higher and of the same suit, play it on the ace
         } else {
             if (getCardValue(clickedCard) === getCardValue(topCard) + 1 && clickedCard.suit === topCard.suit) {
                 while(cardArr.length > 0) {
@@ -320,14 +332,19 @@ function handleDrawClick(element) {
     let topCard = draw[draw.length -1];
     let topCardEl = boardEls.draw.lastChild;
 
+    // if there is no highlighted card, and the draw pile isn't an empty stack, select the top card
     if(!clickedCard && !isEmptyStack(element)){
         topCardEl.className += ' highlight';
         clickedCard = topCard;
+        firstStackId = 'draw';
+        firstClickDest = 'draw';
         let cardsToPush = -1;
         while(cardsToPush < 0){
             cardArr.push(draw.pop());
             cardsToPush++;
         }
+
+    // if the highlighted card is from the draw pile, put it back in the pile (deselect it)
     } else if (topCardEl.className.includes('highlight') && getClickDestination(element) === 'draw') {
         while(cardArr.length > 0) {
             draw.push(cardArr.pop());
@@ -335,6 +352,24 @@ function handleDrawClick(element) {
         clickedCard = null;
         render();
     } 
+}
+
+function handlePileClick () {
+    if(!clickedCard) {
+        // if there are cards in the 'pile', flip one into the 'draw'
+        if(pile.length > 0) {
+            draw.push(pile.pop());
+            render();
+        // if the pile is empty, recycle the 'draw' into the 'pile' and subtract points    
+        } else {
+            while(draw.length > 0) {
+                pile.push(draw.pop())
+            }
+            drawCycles++
+            if (drawCycles > 1) boardScore -= 100;
+            render();
+        }
+    }
 }
 
 function isEmptyStack(element) {
@@ -424,4 +459,25 @@ function count() {
     seconds = secondsPlayed - (minutes * 60);
     
     timerEl.textContent = `time - ${hours > 0 ? `${hours}:` : ''}${minutes < 10 && hours > 0 ? `0${minutes}`: minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+}
+
+function isFaceUpCard(element) {
+    return (element.className.includes('card') && !(element.className.includes('back')) && !(element.className.includes('outline'))) 
+}
+
+function isAcePile(element) {
+    if (!(element.firstChild)) {
+        return element.id.includes('ace');
+    } else {
+        return element.parentNode.id.includes('ace');
+    }
+}
+
+function getClickDestination(element) {
+    if (element.id) {
+        return element.id;
+    } 
+    else {
+        return element.parentNode.id;
+    }
 }

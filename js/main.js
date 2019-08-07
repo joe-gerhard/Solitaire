@@ -4,6 +4,7 @@
 // 3) fix the reset button overlap problem on small window heights
 // 4) add card scaling based on window size functionality
 // 5) add 'instructions' section
+// 6) make highlight more distinct
 
 // STRETCH GOALS:
 // 1) add difficulty option--draw 3 cards at a time instead of 1
@@ -11,7 +12,7 @@
 // 3) highlight all possible moves when card is highlighted
 // 4) make winning more exciting
 // 5) make under function
-// 6) add functionality to 'replay' the same game from the start
+// 6) add functionality to 'replay' the same game/cards from the start
 
 /*----- constants -----*/ 
 
@@ -21,7 +22,7 @@ const values = ['A', '02', '03', '04', '05', '06', '07', '08', '09', '10', 'J', 
 /*----- app's state (variables) -----*/ 
 
 let deck, pile, draw, stacks, aces, winner, clickedCard, firstClickDest, firstStackId, 
-cardArr, secondsPlayed, counter, boardScore, totalScore, drawCycles;
+cardArr, secondsPlayed, counter, boardScore, totalScore, drawCycles, clickCount;
 
 /*----- cached element references -----*/ 
 
@@ -54,6 +55,7 @@ init();
 
 function init() {
     stopTimer();
+    clickCount = 0;
     deck = [];
     pile = [];
     draw = [];
@@ -89,7 +91,7 @@ function render() {
                 }
                 faceUp--;
             }
-            cardEl.style = `position: absolute; left: -7px; top: ${-7 + (cIdx * 10)}px;`
+            cardEl.style = `position: absolute; left: -7px; top: ${-7 + (cIdx * 15)}px;`
             boardEls[`stack${sIdx +1}`].appendChild(cardEl);
         })
     })
@@ -198,6 +200,19 @@ function clearAllDivs() {
     }
 }
 
+function isDoubleClick() {
+    clickCount++;
+    if (clickCount === 1) {
+        singleClickTimer = setTimeout(function() {
+        clickCount = 0;
+        return false;
+        }, 400);
+    } else if (clickCount === 2) {
+        clearTimeout(singleClickTimer);
+        clickCount = 0;
+        return true;
+    }
+}
 function handleClick(evt) {
 
     let clickDest = getClickDestination(evt.target);
@@ -208,16 +223,45 @@ function handleClick(evt) {
     }
 
     if (clickDest.includes('stack')) {
-        handleStackClick(evt.target);
+        isDoubleClick() ? handleStackDoubleClick(evt.target) : handleStackClick(evt.target);
     } else if (clickDest.includes('ace')) {
-        handleAceClick(evt.target);
+        isDoubleClick() ? handleAceDoubleClick(evt.target) : handleAceClick(evt.target);
     } else if (clickDest === 'draw') {
-        handleDrawClick(evt.target);
+        isDoubleClick() ? handleDrawDoubleClick(evt.target) :handleDrawClick(evt.target);
     } else if (clickDest === 'pile') {
         handlePileClick();
     } else if (clickDest === 'resetButton') {
         init();
     }
+}
+
+function handleStackDoubleClick(element) {
+    let stackId = getClickDestination(element).replace('stack', '') -1;
+    let clickDest = getClickDestination(element);
+    let topCard = stacks[stackId][stacks[stackId].length -1];
+
+    if (document.querySelector('.highlight')) {
+        let highlight = document.querySelector('.highlight')
+        // select card to move
+        if (isTheSameCard(highlight, clickedCard)) {
+            moveCardToAcePile(clickDest, stackId);
+        }
+    } else {
+        if (topCard && isFaceUpCard(element)) {
+            moveCardToAcePile(clickDest, stackId)
+        }
+    }
+}
+
+function isTheSameCard(cardEl, cardObj) {
+    card1 = cardEl.className.replace('card ', '');
+    card1 = card1.replace(' highlight', '');
+    card2 = `${cardObj.suit}${cardObj.value}`
+    return card1 === card2;
+}
+
+function moveCardToAcePile(clickDest) {
+    console.log(clickDest);
 }
 
 function handleStackClick(element) {
@@ -266,7 +310,6 @@ function handleStackClick(element) {
                 stacksFaceUp[stackId]++;
             }
             if(firstStackId === 'draw') boardScore += 5;
-            console.log(firstClickDest)
             if(firstClickDest.includes('ace')) boardScore -= 5;
             clickedCard = null;
             render();
@@ -327,6 +370,9 @@ function handleAceClick(element) {
     }
 }
 
+function handleAceDoubleClick(element) {
+
+}
 function handleDrawClick(element) {
 
     let topCard = draw[draw.length -1];
@@ -345,13 +391,17 @@ function handleDrawClick(element) {
         }
 
     // if the highlighted card is from the draw pile, put it back in the pile (deselect it)
-    } else if (topCardEl.className.includes('highlight') && getClickDestination(element) === 'draw') {
+    } else if (!isEmptyStack(element) && topCardEl.className.includes('highlight') && getClickDestination(element) === 'draw') {
         while(cardArr.length > 0) {
             draw.push(cardArr.pop());
         }
         clickedCard = null;
         render();
     } 
+}
+
+function handleDrawDoubleClick(element) {
+
 }
 
 function handlePileClick () {

@@ -10,6 +10,7 @@ body {
     font-family: 'Grenze', serif;
     height: 100vh;
     background: radial-gradient(#409c2b, #385e2c);
+    font-size: 1.5vw;
     /* background-color: green;
     background-image: url(../images/felt.png);
     background-repeat: repeat; */
@@ -17,18 +18,21 @@ body {
 
 h1 {
     color: lightgrey;
-    margin: 0 0 1vh 0;
+    margin: 0;
     font-size: 3.5vw;
 }
 
+#pile {
+    cursor: pointer;
+}
+
 #gameBoard {
-    font-size: 1.6vw;
     display: flex;
     flex-direction: column;
     align-items: stretch center;
     border: 2px solid rgba(167, 201, 164, 0.6);
     border-radius: 5px;    
-    padding: 40px 20px 20px 20px;
+    padding: 20px 20px 20px 20px;
 }
 
 #gameBoard section div {
@@ -45,13 +49,14 @@ h1 {
 
 #bottomRow {
     display: flex;
-    margin-bottom: 18vh;
+    margin-bottom: 31vh;
 }
 
 footer {
     display: flex; 
     justify-content: left;
-    margin-top: auto;
+    margin: 1.5vh 0 auto 0;
+    width: 48vw;
 }
 
 #timer {

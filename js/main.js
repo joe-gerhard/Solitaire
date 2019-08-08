@@ -74,9 +74,21 @@ function init() {
 
 function render() {
     clearAllDivs();
+    renderStacks();
+    renderPile();
+    renderDraw();
+    renderAces();
+    getScore();
+    updateScore();
+    if(checkWinner()) {
+        clearInterval(counter);
+        document.querySelector('h1').textContent = 'You Win!';
+    }
+}
+
+function renderStacks() {
     let count, backs;
-    // for each card on each pile, render them with the card back showing
-    // render them face up if they are supposed to be face up
+
     stacks.forEach((stack, sIdx) => {
         count = 0;
         backs = 0;
@@ -105,17 +117,8 @@ function render() {
             boardEls[`stack${sIdx +1}`].appendChild(cardEl);
         })
     })
-
-    renderPile();
-    renderDraw();
-    renderAces();
-    getScore();
-    updateScore();
-    if(checkWinner()) {
-        clearInterval(counter);
-        document.querySelector('h1').textContent = 'You Win!';
-    }
 }
+
 function renderPile() {
     pile.forEach((card, cIdx) => {
         let cardEl = document.createElement('div');
@@ -214,6 +217,7 @@ function isDoubleClick() {
         return true;
     }
 }
+
 function handleClick(evt) {
 
     let clickDest = getClickDestination(evt.target);
@@ -240,6 +244,7 @@ function handleStackDoubleClick(element) {
     let stackId = getClickDestination(element).replace('stack', '') -1;
     let clickDest = getClickDestination(element);
     let topCard;
+
     if(stackId) {
         topCard = stacks[stackId][stacks[stackId].length -1];
     } else { 
@@ -248,7 +253,6 @@ function handleStackDoubleClick(element) {
 
     if (document.querySelector('.highlight')) {
         let highlightEl = document.querySelector('.highlight')
-        // select card to move
         if (isTheSameCard(highlightEl, clickedCard) && clickDest === getClickDestination(highlightEl)) {
             checkForLegalMove(clickDest);
         }
@@ -359,7 +363,9 @@ function getCardObjFromClass(cardClass) {
     cardObj.value = value;
     return cardObj;
 }
+
 function handleStackClick(element) {
+
     let stackId = getClickDestination(element).replace('stack', '') -1;
     let clickDest = getClickDestination(element);
     let topCard = stacks[stackId][stacks[stackId].length -1];
@@ -617,4 +623,14 @@ function getClickDestination(element) {
     else {
         return element.parentNode.id;
     }
+}
+
+function winGame() {
+    aces.forEach(arr => {
+        
+        for(let i = 0; i < 13; i++) {
+            arr.push(`fake card ${i +1 }`);
+        }
+    })
+    render();
 }

@@ -45,4 +45,5 @@ JS, CSS, and HTML
 4. make winning more exciting
 5. add functionality to 'replay' the exact same game/deal from the start
 6. add an 'instructions' section 
+7. add an 'undo' button
 

@@ -7,8 +7,8 @@
 // 2) add drag and drop functionality
 // 3) highlight all possible moves when card is highlighted
 // 4) make winning more exciting
-// 5) make under function
-// 6) add functionality to 'replay' the same game/cards from the start
+// 5) add functionality to 'replay' the same game/cards from the start
+// 6) make an undo button
 
 /*----- constants -----*/ 
 
@@ -99,7 +99,6 @@ function render() {
                     cardEl.style = `position: absolute; left: -7px; top: ${-7 + (cIdx * 12)}px;`
                     count++
                 } else {
-                    console.log(backs)
                     cardEl.style = `position: absolute; left: -7px; top: ${-7 + (cIdx * 12)+(9 * (cIdx-backs))}px;`
                 }
             }
@@ -107,20 +106,11 @@ function render() {
         })
     })
 
-    // render all cards in the 'pile' face down
     renderPile();
-    
-    // render all cards in the 'draw' face up
     renderDraw();
-
-    // render all cards in the 'ace' piles face up
     renderAces();
-
-    // get and update the current score
     getScore();
     updateScore();
-
-    // check for winner
     if(checkWinner()) {
         clearInterval(counter);
         document.querySelector('h1').textContent = 'You Win!';
@@ -236,7 +226,7 @@ function handleClick(evt) {
     if (clickDest.includes('stack')) {
         isDoubleClick() ? handleStackDoubleClick(evt.target) : handleStackClick(evt.target);
     } else if (clickDest.includes('ace')) {
-        isDoubleClick() ? handleAceDoubleClick(evt.target) : handleAceClick(evt.target);
+        handleAceClick(evt.target);
     } else if (clickDest === 'draw') {
         isDoubleClick() ? handleStackDoubleClick(evt.target) :handleDrawClick(evt.target);
     } else if (clickDest === 'pile') {
@@ -250,19 +240,16 @@ function handleStackDoubleClick(element) {
     let stackId = getClickDestination(element).replace('stack', '') -1;
     let clickDest = getClickDestination(element);
     let topCard;
-    console.log(stackId);
-    console.log(clickDest);
     if(stackId) {
         topCard = stacks[stackId][stacks[stackId].length -1];
     } else { 
         topCard = draw[draw.length -1];
     }
-    console.log(topCard)
 
     if (document.querySelector('.highlight')) {
         let highlightEl = document.querySelector('.highlight')
         // select card to move
-        if (isTheSameCard(highlightEl, clickedCard)) {
+        if (isTheSameCard(highlightEl, clickedCard) && clickDest === getClickDestination(highlightEl)) {
             checkForLegalMove(clickDest);
         }
     } else {
@@ -275,6 +262,7 @@ function handleStackDoubleClick(element) {
 function isTheSameCard(cardEl, cardObj) {
     let card1 = getCardClassFromEl(cardEl);
     let card2 = getCardClassFromObj(cardObj);
+    
     return card1 === card2;
 }
 
@@ -296,15 +284,10 @@ function checkForLegalMove(clickDest) {
     let cardObj = getCardObjFromClass(card);
     let acePileTopCardsArr = getAcePileTopCards();
     
-    // console.log(clickDest);
-    // console.log(cardObj);
-    // console.log(acePileTopCardsArr)
-
     // move a card to the proper place if it's a legal play
     acePileTopCardsArr.forEach((topCardObj, aceIdx) => {
         if (topCardObj.suit === cardObj.suit) {
             if(getCardValue(topCardObj) === getCardValue(cardObj) -1) {
-                console.log(`there is a legal play for that ${cardObj.value} in stack ${aceIdx +1}`)
                 if(!clickedCard) {
                     moveTopCard(stacks[stackIdx], aces[aceIdx]);
                     stacksFaceUp[stackIdx]--;
@@ -315,11 +298,8 @@ function checkForLegalMove(clickDest) {
                     render();
     
                 } else if(clickedCard) {
-                    console.log(clickedCard)
-                    console.log(cardArr)
                     aces[aceIdx].push(clickedCard);
                     clickedCard = null;
-                    // stacksFaceUp[stackIdx]--;
                     while(cardArr.length > 0) {
                         cardArr.pop();
                     }
@@ -343,11 +323,8 @@ function checkForLegalMove(clickDest) {
                 render();
 
             } else if(clickedCard) {
-                console.log(clickedCard)
-                console.log(cardArr)
                 aces[aceIdx].push(clickedCard);
                 clickedCard = null;
-                // stacksFaceUp[stackIdx]--;
                 while(cardArr.length > 0) {
                     cardArr.pop();
                 }
@@ -383,7 +360,6 @@ function getCardObjFromClass(cardClass) {
     return cardObj;
 }
 function handleStackClick(element) {
-    // console.log('here')
     let stackId = getClickDestination(element).replace('stack', '') -1;
     let clickDest = getClickDestination(element);
     let topCard = stacks[stackId][stacks[stackId].length -1];
@@ -391,7 +367,6 @@ function handleStackClick(element) {
 
     // select and highlight card to move
     if (!clickedCard && isFaceUpCard(element)) {
-        // console.log('here')
         firstStackId = stackId;
         firstClickDest = clickDest;
         element.className += ' highlight';
@@ -406,19 +381,15 @@ function handleStackClick(element) {
 
     // flip over unflipped card in stack
     } else if (!clickedCard && element === element.parentNode.lastChild) {
-        // console.log('here')
-        console.log(stackId)
         stacksFaceUp[stackId]++;
         boardScore += 5;
         render();
 
     // move card to stack destination
     } else if (clickedCard && isFaceUpCard(element)) {
-        // console.log('here')
 
         // allow clicks on first clicked card
         if (stackId === firstStackId && clickDest === firstClickDest) {
-            // console.log('here')
             while(cardArr.length > 0) {
                 stacks[stackId].push(cardArr.pop());
                 stacksFaceUp[stackId]++
@@ -428,7 +399,6 @@ function handleStackClick(element) {
 
         // push card to stack if play is legal
         } else if(isPlayLegal(clickedCard, topCard)){
-            // console.log('here')
             while(cardArr.length > 0) {
                 stacks[stackId].push(cardArr.pop());
                 stacksFaceUp[stackId]++;
@@ -441,7 +411,6 @@ function handleStackClick(element) {
 
     // move card to empty stack destination
     } else if (clickedCard && isEmptyStack(element) && getCardValue(clickedCard) === 13) {
-        // console.log('here')
         while(cardArr.length > 0) {
             stacks[stackId].push(cardArr.pop());
             stacksFaceUp[stackId]++;
@@ -493,10 +462,6 @@ function handleAceClick(element) {
             }
         }    
     }
-}
-
-function handleAceDoubleClick(element) {
-
 }
 
 function handleDrawClick(element) {

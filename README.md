@@ -2,7 +2,7 @@
 
 ### Objective:
 
-Make a JS based Solitaire game
+Make a vanilla JS Solitaire game
 
 ### Technology Used:
 

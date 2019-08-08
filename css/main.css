@@ -50,13 +50,13 @@ h1 {
 
 #bottomRow {
     display: flex;
-    margin-bottom: 30vh;
+    margin-bottom: 38vh;
 }
 
 footer {
     display: flex; 
     justify-content: left;
-    margin: 1.5vh 0 auto 0;
+    margin: 1vh 0 auto 0;
     width: 48vw;
 }
 

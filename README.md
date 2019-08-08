@@ -1,5 +1,19 @@
 # JS-Solitaire
 
+### Wireframe:
+
+![alt text](https://i.imgur.com/bHKEV9M.png)
+
+### Pseudocode:
+
+1. Make a deck of cards
+2. Shuffle it
+3. Deal the cards to the board
+4. Render the game board
+5. If a player clicks a card store it as a ‘clicked card’
+6. If there is a ‘clicked card’, play that card in the next clicked location (as long as it’s a legal play)
+7. If all of the ace piles are full and in order, the player has won the game
+
 ### Screenshot:
 
 ![alt text](https://i.imgur.com/ogQiUvB.png)
@@ -15,10 +29,6 @@ Make a vanilla JS Solitaire game
 ### Technology Used:
 
 JS, CSS, and HTML
-
-### Wireframe:
-
-![alt text](https://i.imgur.com/bHKEV9M.png)
 
 
 ### User Stories:

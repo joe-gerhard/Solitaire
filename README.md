@@ -18,7 +18,7 @@ JS, CSS, and HTML
 
 ### Wireframe:
 
-https://wireframe.cc/hIluXg
+![alt text](https://i.imgur.com/bHKEV9M.png)
 
 
 ### User Stories:
@@ -26,6 +26,9 @@ https://wireframe.cc/hIluXg
 1. As a user, I should be able to click on a card and then click on a destination to move it
 2. As a user, I should be able to click the draw pile to flip over the top card.
 3. As a user, I should be able to click the reset button to start a new game.
+4. As a user, I should know what my score is at any point of the game
+5. As a user, I should be able to double click on a card to play it directly to a legal ace pile.
+6. As a user, I should be able to know when I've won the game.
 
 ### Feature List:
 
@@ -41,4 +44,5 @@ https://wireframe.cc/hIluXg
 3. highlight all possible moves when card is highlighted
 4. make winning more exciting
 5. add functionality to 'replay' the exact same game/deal from the start
+6. add an 'instructions' section 
 

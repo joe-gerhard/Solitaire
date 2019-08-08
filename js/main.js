@@ -1,10 +1,6 @@
 // TODO:
-// 1) add double click functionality for scoring cards
-// 2) subtract time penalty from final score
-// 3) fix the reset button overlap problem on small window heights
-// 4) add card scaling based on window size functionality
-// 5) add 'instructions' section
-// 6) make highlight more distinct
+// 1) subtract time penalty from final score
+// 2) add 'instructions' section
 
 // STRETCH GOALS:
 // 1) add difficulty option--draw 3 cards at a time instead of 1

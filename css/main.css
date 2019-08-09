@@ -12,9 +12,6 @@ body {
     height: 100vh;
     background: radial-gradient(#409c2b, #385e2c);
     font-size: 1.5vw;
-    /* background-color: green;
-    background-image: url(../images/felt.png);
-    background-repeat: repeat; */
 }
 
 h1 {

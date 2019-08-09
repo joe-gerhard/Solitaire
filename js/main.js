@@ -1,6 +1,5 @@
 // TODO:
 // 1) subtract time penalty from final score
-// 2) add 'instructions' section
 
 // STRETCH GOALS:
 // 1) add difficulty option--draw 3 cards at a time instead of 1
@@ -9,6 +8,7 @@
 // 4) make winning more exciting
 // 5) add functionality to 'replay' the same game/cards from the start
 // 6) make an undo button
+// 7) add 'instructions' section
 
 /*----- constants -----*/ 
 

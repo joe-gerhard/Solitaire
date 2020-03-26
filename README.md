@@ -1,5 +1,9 @@
 # JS-Solitaire
 
+### Deployed Link:
+
+https://joe-gerhard.github.io/Solitaire/
+
 ### Wireframe:
 
 ![alt text](https://i.imgur.com/bHKEV9M.png)
@@ -17,10 +21,6 @@
 ### Screenshot:
 
 ![alt text](https://i.imgur.com/ogQiUvB.png)
-
-### Getting Started:
-
-https://sleepyjosus.github.io/Solitaire/
 
 ### Objective:
 
